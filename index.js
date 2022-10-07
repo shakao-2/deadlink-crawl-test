@@ -11,7 +11,7 @@ try {
   let brokenLinks = [];
 
   const options = {
-    excludedKeywords: ["linkedin"]
+    excludedKeywords: ["linkedin.com", "netlify.com"]
   }
 
   const handlers = {
@@ -28,31 +28,35 @@ try {
         brokenLinks = [];
       }
     },
-    site: (error, siteURL) => {
-      console.log("Done scanning!")
-      console.log(result)
+    site: () => {
+      console.log("Done scanning!");
+
+      let count = 0;
+      let issue = "## Dead links found";
+      Object.keys(result).forEach(page => {
+        issue += `\r\n \r\n[ ] ${page}`;
+        for (let link of result[page]) {
+          issue += `\r\n    [ ] ${link}`;
+          count += 1;
+        }
+      })
+
+      console.log(issue)
+
+      console.log(`${count} broken links found`)
 
       const context = github.context;
-
-      const newIssue = octokit.rest.issues.create({
+      const readout = octokit.rest.issues.create({
         ...context.repo,
-        title: 'New issue!',
-        body: 'Hello Universe!'
+        title: 'Learning center deadlinks',
+        body: issue,
       });
     },
   }
 
-  const siteChecker = new SiteChecker(options, handlers)
+  const siteChecker = new SiteChecker(options, handlers);
   siteChecker.enqueue("https://www.justfix.org/en/learn/");
 
-//  // `who-to-greet` input defined in action metadata file
-//   const nameToGreet = core.getInput('who-to-greet');
-//   console.log(`Hello ${nameToGreet}!`);
-//   const time = (new Date()).toTimeString();
-//   core.setOutput("time", time);
-//   // Get the JSON webhook payload for the event that triggered the workflow
-//   const payload = JSON.stringify(github.context.payload, undefined, 2)
-//   console.log(`The event payload: ${payload}`);
 } catch (error) {
   core.setFailed(error.message);
 }
