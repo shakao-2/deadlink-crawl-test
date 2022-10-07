@@ -57078,24 +57078,25 @@ try {
     excludedKeywords: ["linkedin"]
   }
 
-  const siteChecker = new SiteChecker(options)
+  const siteChecker = new SiteChecker(options);
+  siteChecker.on('page', (error, pageURL, customData) => {
+      console.log("-----PAGE-----")
+      console.log(error)
+      console.log(pageURL)
+    });
+  siteChecker.on('site', (error, siteURL, customData) => {
+      console.log("-----SITE-----")
+      console.log(error)
+      console.log(siteURL)
+    });
+  siteChecker.on('end', () => {});
+
     // .on('error', (error) => {})
     // .on('robots', (robots, customData) => {})
     // .on('html', (tree, robots, response, pageURL, customData) => {})
     // .on('queue', () => {})
     // .on('junk', (result, customData) => {})
     // .on('link', (result, customData) => {})
-    .on('page', (error, pageURL, customData) => {
-      console.log("-----PAGE-----")
-      console.log(error)
-      console.log(pageURL)
-    })
-    .on('site', (error, siteURL, customData) => {
-      console.log("-----SITE-----")
-      console.log(error)
-      console.log(siteURL)
-    })
-    .on('end', () => {});
 
   siteChecker.enqueue("https://www.justfix.org/en/learn/");
 
