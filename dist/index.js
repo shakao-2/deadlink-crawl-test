@@ -57074,6 +57074,10 @@ const { SiteChecker } = __nccwpck_require__(917);
 
 try {
 
+  const options = {
+    excludedKeywords: ["linkedin"]
+  }
+
   const siteChecker = new SiteChecker(options)
     // .on('error', (error) => {})
     // .on('robots', (robots, customData) => {})
