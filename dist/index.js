@@ -57073,31 +57073,45 @@ const { SiteChecker } = __nccwpck_require__(917);
 
 
 try {
+  const repoToken = core.getInput('token');
+  const octokit = github.getOctokit(repoToken)
+
+  const result = {}
+  let brokenLinks = [];
 
   const options = {
     excludedKeywords: ["linkedin"]
   }
 
-  const siteChecker = new SiteChecker(options);
-  siteChecker.on('page', (error, pageURL, customData) => {
-      console.log("-----PAGE-----")
-      console.log(error)
-      console.log(pageURL)
-    });
-  siteChecker.on('site', (error, siteURL, customData) => {
-      console.log("-----SITE-----")
-      console.log(error)
-      console.log(siteURL)
-    });
-  siteChecker.on('end', () => {});
+  const handlers = {
+    link: (result) => {
+      if (result.broken) {
+        brokenLinks.push(result.url.original)
+      }
+    },
+    page: (error, pageURL) => {
+      console.log(`Scanned... ${pageURL}`)
+      if (brokenLinks.length) {
+        console.log(`${brokenLinks.length} broken links\r\n`)
+        result[pageURL] = brokenLinks;
+        brokenLinks = [];
+      }
+    },
+    site: (error, siteURL) => {
+      console.log("Done scanning!")
+      console.log(result)
 
-    // .on('error', (error) => {})
-    // .on('robots', (robots, customData) => {})
-    // .on('html', (tree, robots, response, pageURL, customData) => {})
-    // .on('queue', () => {})
-    // .on('junk', (result, customData) => {})
-    // .on('link', (result, customData) => {})
+      const context = github.context;
 
+      const newIssue = octokit.rest.issues.create({
+        ...context.repo,
+        title: 'New issue!',
+        body: 'Hello Universe!'
+      });
+    },
+  }
+
+  const siteChecker = new SiteChecker(options, handlers)
   siteChecker.enqueue("https://www.justfix.org/en/learn/");
 
 //  // `who-to-greet` input defined in action metadata file
