@@ -5,6 +5,10 @@ const { SiteChecker } = require('broken-link-checker');
 
 try {
 
+  const options = {
+    excludedKeywords: ["linkedin"]
+  }
+
   const siteChecker = new SiteChecker(options)
     // .on('error', (error) => {})
     // .on('robots', (robots, customData) => {})
