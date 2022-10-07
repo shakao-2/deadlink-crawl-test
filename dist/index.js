@@ -57073,10 +57073,12 @@ const { SiteChecker } = __nccwpck_require__(917);
 
 
 try {
-  const repoToken = core.getInput('token');
-  const octokit = github.getOctokit(repoToken)
+  const siteUrl = core.getInput('site-url');
 
-  const result = {}
+  const repoToken = core.getInput('token');
+  const octokit = github.getOctokit(repoToken);
+
+  const result = {};
   let brokenLinks = [];
 
   const options = {
@@ -57086,13 +57088,13 @@ try {
   const handlers = {
     link: (result) => {
       if (result.broken) {
-        brokenLinks.push(result.url.original)
+        brokenLinks.push(result.url.original);
       }
     },
     page: (error, pageURL) => {
-      console.log(`Scanned... ${pageURL}`)
+      console.log(`Scanned... ${pageURL}`);
       if (brokenLinks.length) {
-        console.log(`${brokenLinks.length} broken links\r\n`)
+        console.log(`${brokenLinks.length} broken links\r\n`);
         result[pageURL] = brokenLinks;
         brokenLinks = [];
       }
@@ -57103,19 +57105,17 @@ try {
       let count = 0;
       let issue = "## Dead links found";
       Object.keys(result).forEach(page => {
-        issue += `\r\n \r\n[ ] ${page}`;
+        issue += `\r\n \r\n- [ ] ${page}`;
         for (let link of result[page]) {
-          issue += `\r\n    [ ] ${link}`;
+          issue += `\r\n  - [ ] ${link}`;
           count += 1;
         }
       })
 
-      console.log(issue)
-
-      console.log(`${count} broken links found`)
+      console.log(`${count} broken links found`);
 
       const context = github.context;
-      const readout = octokit.rest.issues.create({
+      octokit.rest.issues.create({
         ...context.repo,
         title: 'Learning center deadlinks',
         body: issue,
@@ -57124,7 +57124,7 @@ try {
   }
 
   const siteChecker = new SiteChecker(options, handlers);
-  siteChecker.enqueue("https://www.justfix.org/en/learn/");
+  siteChecker.enqueue(siteUrl);
 
 } catch (error) {
   core.setFailed(error.message);
